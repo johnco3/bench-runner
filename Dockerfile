@@ -73,7 +73,7 @@ ARG DOCKER_VERSION=25.0.3
 
 # Install only runtime dependencies (prebuilt Node.js, certs & curl)
 RUN apt-get update && \
-   apt-get install -y --no-install-recommends nodejs ca-certificates curl && \
+   apt-get install -y --no-install-recommends nodejs ca-certificates curl procmail && \
    rm -rf /var/lib/apt/lists/*
 
 # Add NodeSource repository and key for Node.js (prebuilt binaries)
@@ -91,3 +91,4 @@ COPY --from=build /quick-bench /quick-bench
 
 # Set working directory
 WORKDIR /quick-bench
+
