@@ -1,5 +1,5 @@
 # --- Build Stage ---
-FROM ubuntu:25.04 AS build
+FROM ubuntu:25.10 AS build
 
 LABEL maintainer="John Coffey"
 ARG BACKEND_BRANCH=main
@@ -48,14 +48,14 @@ RUN git clone -b ${BACKEND_BRANCH} https://github.com/johnco3/quick-bench-back-e
     cd /quick-bench-back-end && \
     npm install && \
     echo '{ \
-      "defaultAction": "SCMP_ACT_ALLOW", \
-      "archMap": [ \
-        { "architecture": "SCMP_ARCH_X86_64", "subArchitectures": [ "SCMP_ARCH_X86", "SCMP_ARCH_X32" ] }, \
-        { "architecture": "SCMP_ARCH_AARCH64", "subArchitectures": [ "SCMP_ARCH_ARM" ] } \
-      ], \
-      "syscalls": [ \
-        { "names": ["perf_event_open"], "action": "SCMP_ACT_ALLOW" } \
-      ] \
+    "defaultAction": "SCMP_ACT_ALLOW", \
+    "archMap": [ \
+    { "architecture": "SCMP_ARCH_X86_64", "subArchitectures": [ "SCMP_ARCH_X86", "SCMP_ARCH_X32" ] }, \
+    { "architecture": "SCMP_ARCH_AARCH64", "subArchitectures": [ "SCMP_ARCH_ARM" ] } \
+    ], \
+    "syscalls": [ \
+    { "names": ["perf_event_open"], "action": "SCMP_ACT_ALLOW" } \
+    ] \
     }' > seccomp.json && \
     (sysctl -w kernel.perf_event_paranoid=1 || echo "Cannot set perf_event_paranoid in container")
 
@@ -66,15 +66,15 @@ RUN cp -r /quick-bench-back-end/* /quick-bench/
 COPY ./build-scripts/start-* /quick-bench/
 
 # --- Production Stage ---
-FROM ubuntu:25.04 AS final
+FROM ubuntu:25.10 AS final
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG DOCKER_VERSION=25.0.3
 
 # Install only runtime dependencies (prebuilt Node.js, certs & curl)
 RUN apt-get update && \
-   apt-get install -y --no-install-recommends nodejs ca-certificates curl procmail && \
-   rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends nodejs ca-certificates curl procmail && \
+    rm -rf /var/lib/apt/lists/*
 
 # Add NodeSource repository and key for Node.js (prebuilt binaries)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
